@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News App</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://code.jquery.com; img-src 'self' *; style-src 'self'">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #222;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #f39c12;
+        }
+
+        .search-container {
+            position: relative;
+            width: 60%;
+            margin: 0 auto;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+
+        #search-icon {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #f39c12;
+        }
+
+        #search-results {
+            display: none;
+            width: 90%;
+            margin: 20px auto;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-result-item {
+            display: flex;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #444;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .search-result-item img {
+            width: 60px;
+            height: 60px;
+            margin-right: 10px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .search-result-item-content {
+            text-align: left;
+        }
+
+        .search-result-item:hover {
+            background-color: #555;
+        }
+
+        #welcome-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to the News App</h1>
+    
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search for news...">
+        <span id="search-icon">&#128269;</span> <!-- Unicode for search icon -->
+    </div>
+
+    <div id="search-results"></div>
+
+    <div id="welcome-popup">
+        <h2>Welcome!</h2>
+        <p>Start typing to search for the latest news.</p>
+        <button onclick="closePopup()">Got it!</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Show welcome popup on load
+            $("#welcome-popup").fadeIn();
+
+            // Close the welcome popup
+            window.closePopup = function() {
+                $("#welcome-popup").fadeOut();
+            };
+
+            let searchTimeout;
+
+            // Trigger search when user types
+            $("#search-input").on("input", function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    performSearch();
+                }, 300);
+            });
+
+            // Trigger search when search icon is clicked
+            $("#search-icon").click(function() {
+                performSearch();
+            });
+
+            function performSearch() {
+                let searchTerm = $("#search-input").val();
+
+                // Remove special characters for safety
+                searchTerm = searchTerm.replace(/[^a-zA-Z0-9\s]/g, "");
+
+                if (searchTerm.length > 100) {
+                    alert("Search term is too long.");
+                    return;
+                }
+
+                if (searchTerm.trim() === "") {
+                    $("#search-results").hide();
+                    return;
+                }
+
+                // Simulate AJAX request with mock data
+                mockAjaxSearch(searchTerm);
+            }
+
+            // Simulate backend search
+            function mockAjaxSearch(searchTerm) {
+                // Mock data
+                const mockData = [
+                    { title: "Breaking News: Market Hits Record High", description: "The stock market has reached an all-time high today.", image: "https://via.placeholder.com/60", link: "https://example.com/news1" },
+                    { title: "Sports Update: Local Team Wins Championship", description: "The local team triumphed in the finals.", image: "https://via.placeholder.com/60", link: "https://example.com/news2" },
+                    { title: "Weather Alert: Heavy Rain Expected Tomorrow", description: "Meteorologists predict heavy rain across the region.", image: "https://via.placeholder.com/60", link: "https://example.com/news3" },
+                    { title: "Tech News: New Smartphone Released", description: "A major tech company has launched its latest smartphone.", image: "https://via.placeholder.com/60", link: "https://example.com/news4" },
+                    { title: "Global Politics: Leaders Meet for Summit", description: "World leaders gather to discuss climate change.", image: "https://via.placeholder.com/60", link: "https://example.com/news5" }
+                ];
+
+                // Filter results based on the search term
+                const filteredResults = mockData.filter(item =>
+                    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    item.description.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                displayResults(filteredResults);
+            }
+
+            // Display results in the results container
+            function displayResults(results) {
+                $("#search-results").empty();
+
+                if (results.length === 0) {
+                    $("#search-results").append("<p>No results found.</p>");
+                } else {
+                    results.forEach(item => {
+                        const resultItem = $(`
+                            <div class="search-result-item">
+                                <img src="${item.image}" alt="${item.title}">
+                                <div class="search-result-item-content">
+                                    <h3>${item.title}</h3>
+                                    <p>${item.description}</p>
+                                </div>
+                            </div>
+                        `);
+
+                        resultItem.click(function() {
+                            window.open(item.link, '_blank');
+                        });
+
+                        $("#search-results").append(resultItem);
+                    });
+                }
+
+                $("#search-results").show();
+            }
+        });
+    </script>
+
+</body>
+</html>
